@@ -89,15 +89,22 @@ include '../templates/header.php';
         <!-- Ajout au panier -->
         <div class="d-flex align-items-center gap-3">
             <?php if($produit['stock'] > 0): ?>
-                <div class="input-group" style="width: 150px;">
-                    <button class="btn btn-outline-secondary" type="button">-</button>
-                    <input type="number" class="form-control text-center" value="1" min="1" max="<?= $produit['stock'] ?>">
-                    <button class="btn btn-outline-secondary" type="button">+</button>
-                </div>
-                
-                <button type="button" class="btn btn-success btn-lg flex-grow-1">
-                    <i class="fas fa-shopping-cart"></i> Ajouter au panier
-                </button>
+                <form action="../../controllers/PanierController.php?action=add" method="POST" class="d-flex align-items-center gap-3 w-100">
+                    <input type="hidden" name="produit_id" value="<?= $produit['id'] ?>">
+                    
+                    <div class="input-group" style="width: 150px;">
+                        <button type="button" class="btn btn-outline-secondary" 
+                                onclick="let input = this.nextElementSibling; if(input.value > 1) input.value--;">-</button>
+                        <input type="number" name="quantite" class="form-control text-center" 
+                               value="1" min="1" max="<?= $produit['stock'] ?>">
+                        <button type="button" class="btn btn-outline-secondary" 
+                                onclick="let input = this.previousElementSibling; if(input.value < <?= $produit['stock'] ?>) input.value++;">+</button>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success btn-lg flex-grow-1">
+                        <i class="fas fa-shopping-cart"></i> Ajouter au panier
+                    </button>
+                </form>
             <?php else: ?>
                 <button class="btn btn-secondary btn-lg" disabled>
                     <i class="fas fa-times"></i> Rupture de stock

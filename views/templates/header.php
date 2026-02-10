@@ -45,8 +45,19 @@
         </li>
         
         <li class="nav-item">
-          <a class="nav-link position-relative" href="#">
+          <a class="nav-link position-relative" href="/cours/e-commerce/views/panier/index.php">
             <i class="fas fa-shopping-cart"></i> Panier
+            <?php 
+              $nb_articles = 0;
+              if(isset($_SESSION['panier'])) {
+                  $nb_articles = array_sum($_SESSION['panier']);
+              }
+              if($nb_articles > 0): 
+            ?>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    <?= $nb_articles ?>
+                </span>
+            <?php endif; ?>
           </a>
         </li>
         

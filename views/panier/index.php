@@ -1,97 +1,164 @@
-<?php require_once __DIR__ . '/../templates/header.php'; ?>
+<?php
+session_start();
 
-<div class="container">
-    <div class="page-header">
-        <h1><i class="fas fa-shopping-cart"></i> Mon Panier</h1>
+include_once '../../config/database.php';
+include_once '../../models/Produit.php';
+
+$database = new Database();
+$db = $database->getConnection();
+$produitModel = new Produit($db);
+
+// Récupérer les détails des produits dans le panier
+$panierItems = array();
+$total = 0;
+
+if(isset($_SESSION['panier']) && !empty($_SESSION['panier'])) {
+    foreach($_SESSION['panier'] as $produit_id => $quantite) {
+        $produit = $produitModel->lireUn($produit_id);
+        if($produit) {
+            $produit['quantite'] = $quantite;
+            $produit['sous_total'] = $produit['prix'] * $quantite;
+            $total += $produit['sous_total'];
+            $panierItems[] = $produit;
+        }
+    }
+}
+
+include '../templates/header.php';
+?>
+
+<h2 class="mb-4">
+    <i class="fas fa-shopping-cart"></i> Mon Panier
+</h2>
+
+<?php if(empty($panierItems)): ?>
+    <!-- Panier vide -->
+    <div class="text-center py-5">
+        <i class="fas fa-shopping-cart fa-5x text-muted mb-4"></i>
+        <h3>Votre panier est vide</h3>
+        <p class="text-muted">Découvrez nos produits et ajoutez-les à votre panier</p>
+        <a href="../produits/index.php" class="btn btn-success btn-lg mt-3">
+            <i class="fas fa-store"></i> Voir les produits
+        </a>
     </div>
-    
-    <?php if (empty($panierItems)): ?>
-        <div class="empty-cart">
-            <i class="fas fa-shopping-cart"></i>
-            <h2>Votre panier est vide</h2>
-            <p>Découvrez nos produits et ajoutez-les à votre panier</p>
-            <a href="index.php?controller=produit&action=index" class="btn btn-primary">
-                Voir les produits
-            </a>
-        </div>
-    <?php else: ?>
-        <div class="cart-container">
-            <div class="cart-items">
-                <?php foreach ($panierItems as $item): ?>
-                    <div class="cart-item">
-                        <div class="item-image">
-                            <img src="public/images/produits/<?php echo htmlspecialchars($item['image']); ?>" 
-                                 alt="<?php echo htmlspecialchars($item['nom']); ?>">
-                        </div>
-                        
-                        <div class="item-details">
-                            <h3><?php echo htmlspecialchars($item['nom']); ?></h3>
-                            <p class="item-info">
-                                <span><i class="fas fa-tag"></i> <?php echo htmlspecialchars($item['marque']); ?></span>
-                                <span><i class="fas fa-ruler"></i> <?php echo htmlspecialchars($item['taille']); ?></span>
-                            </p>
-                            <p class="item-price">
-                                <?php echo number_format($item['prix'], 2, ',', ' '); ?> €
-                            </p>
-                        </div>
-                        
-                        <div class="item-actions">
-                            <form action="index.php?controller=panier&action=update" method="POST" class="quantity-form">
-                                <input type="hidden" name="produit_id" value="<?php echo $item['id']; ?>">
-                                <label>Quantité :</label>
-                                <input type="number" 
-                                       name="quantite" 
-                                       value="<?php echo $item['quantite']; ?>" 
-                                       min="1" 
-                                       max="<?php echo $item['stock']; ?>"
-                                       onchange="this.form.submit()">
-                            </form>
+
+<?php else: ?>
+    <!-- Panier avec produits -->
+    <div class="row">
+        <!-- Liste des produits -->
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Articles dans votre panier</h5>
+                </div>
+                <div class="card-body p-0">
+                    <?php foreach($panierItems as $item): ?>
+                        <div class="d-flex align-items-center border-bottom p-3">
+                            <!-- Image -->
+                            <div class="me-3">
+                                <?php 
+                                    $img = !empty($item['image']) ? "../../public/images/produits/".$item['image'] : "https://via.placeholder.com/80";
+                                ?>
+                                <img src="<?= $img ?>" alt="<?= $item['nom'] ?>" 
+                                     style="width: 80px; height: 80px; object-fit: contain;">
+                            </div>
                             
-                            <p class="item-subtotal">
-                                Sous-total : <strong><?php echo number_format($item['sous_total'], 2, ',', ' '); ?> €</strong>
-                            </p>
+                            <!-- Détails -->
+                            <div class="flex-grow-1">
+                                <h5 class="mb-1"><?= htmlspecialchars($item['nom']) ?></h5>
+                                <p class="text-muted small mb-1">
+                                    <i class="fas fa-tag"></i> <?= htmlspecialchars($item['marque']) ?> • 
+                                    Taille: <?= htmlspecialchars($item['taille']) ?>
+                                </p>
+                                <p class="mb-0 text-success fw-bold">
+                                    <?= number_format($item['prix'], 2) ?> €
+                                </p>
+                            </div>
                             
-                            <form action="index.php?controller=panier&action=remove" method="POST">
-                                <input type="hidden" name="produit_id" value="<?php echo $item['id']; ?>">
-                                <button type="submit" class="btn-remove" onclick="return confirm('Voulez-vous vraiment supprimer cet article ?')">
-                                    <i class="fas fa-trash"></i> Supprimer
-                                </button>
-                            </form>
+                            <!-- Quantité -->
+                            <div class="mx-3">
+                                <form action="../../controllers/PanierController.php?action=update" method="POST" class="d-inline">
+                                    <input type="hidden" name="produit_id" value="<?= $item['id'] ?>">
+                                    <div class="input-group" style="width: 120px;">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" 
+                                                onclick="this.nextElementSibling.stepDown(); this.form.submit();">-</button>
+                                        <input type="number" name="quantite" class="form-control form-control-sm text-center" 
+                                               value="<?= $item['quantite'] ?>" min="0" max="<?= $item['stock'] ?>"
+                                               onchange="this.form.submit()">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" 
+                                                onclick="this.previousElementSibling.stepUp(); this.form.submit();">+</button>
+                                    </div>
+                                </form>
+                            </div>
+                            
+                            <!-- Sous-total -->
+                            <div class="text-end" style="min-width: 100px;">
+                                <p class="mb-0 fw-bold"><?= number_format($item['sous_total'], 2) ?> €</p>
+                            </div>
+                            
+                            <!-- Supprimer -->
+                            <div class="ms-3">
+                                <a href="../../controllers/PanierController.php?action=remove&id=<?= $item['id'] ?>" 
+                                   class="btn btn-outline-danger btn-sm"
+                                   onclick="return confirm('Retirer cet article du panier ?')">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
                         </div>
-                    </div>
-                <?php endforeach; ?>
+                    <?php endforeach; ?>
+                </div>
             </div>
             
-            <div class="cart-summary">
-                <h2>Récapitulatif</h2>
-                
-                <div class="summary-line">
-                    <span>Sous-total</span>
-                    <span><?php echo number_format($total, 2, ',', ' '); ?> €</span>
-                </div>
-                
-                <div class="summary-line">
-                    <span>Livraison</span>
-                    <span>Gratuite</span>
-                </div>
-                
-                <div class="summary-divider"></div>
-                
-                <div class="summary-line total">
-                    <span>Total</span>
-                    <span><?php echo number_format($total, 2, ',', ' '); ?> €</span>
-                </div>
-                
-                <a href="index.php?controller=panier&action=checkout" class="btn btn-primary btn-block">
-                    <i class="fas fa-check"></i> Valider la commande
-                </a>
-                
-                <a href="index.php?controller=produit&action=index" class="btn btn-secondary btn-block">
+            <!-- Boutons d'action -->
+            <div class="d-flex gap-2">
+                <a href="../produits/index.php" class="btn btn-outline-secondary">
                     <i class="fas fa-arrow-left"></i> Continuer mes achats
+                </a>
+                <a href="../../controllers/PanierController.php?action=clear" 
+                   class="btn btn-outline-danger"
+                   onclick="return confirm('Vider tout le panier ?')">
+                    <i class="fas fa-trash"></i> Vider le panier
                 </a>
             </div>
         </div>
-    <?php endif; ?>
-</div>
+        
+        <!-- Récapitulatif -->
+        <div class="col-md-4">
+            <div class="card shadow-sm sticky-top" style="top: 20px;">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Récapitulatif</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Sous-total</span>
+                        <span><?= number_format($total, 2) ?> €</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Livraison</span>
+                        <span class="text-success fw-bold">Gratuite</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-3">
+                        <strong>Total</strong>
+                        <strong class="text-success fs-4"><?= number_format($total, 2) ?> €</strong>
+                    </div>
+                    
+                    <?php if(isset($_SESSION['user_id'])): ?>
+                        <button class="btn btn-success w-100 btn-lg" disabled>
+                            <i class="fas fa-check"></i> Valider la commande
+                        </button>
+                        <small class="text-muted d-block mt-2 text-center">
+                            (Fonctionnalité à venir)
+                        </small>
+                    <?php else: ?>
+                        <a href="../users/login.php" class="btn btn-success w-100 btn-lg">
+                            <i class="fas fa-sign-in-alt"></i> Se connecter pour commander
+                        </a>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
 
-<?php require_once __DIR__ . '/../templates/footer.php'; ?>
+<?php include '../templates/footer.php'; ?>

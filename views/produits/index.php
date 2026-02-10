@@ -103,9 +103,13 @@ include '../templates/header.php';
                                     <i class="fas fa-eye"></i> Voir détails
                                 </a>
                                 <?php if($stock > 0): ?>
-                                    <button class="btn btn-success">
-                                        <i class="fas fa-shopping-cart"></i> Ajouter au panier
-                                    </button>
+                                    <form action="../../controllers/PanierController.php?action=add" method="POST">
+                                        <input type="hidden" name="produit_id" value="<?= $id ?>">
+                                        <input type="hidden" name="quantite" value="1">
+                                        <button type="submit" class="btn btn-success w-100">
+                                            <i class="fas fa-shopping-cart"></i> Ajouter au panier
+                                        </button>
+                                    </form>
                                 <?php else: ?>
                                     <button class="btn btn-secondary" disabled>
                                         <i class="fas fa-times"></i> Rupture de stock
