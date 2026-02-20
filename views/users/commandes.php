@@ -1,77 +1,64 @@
-<?php require_once __DIR__ . '/../templates/header.php'; ?>
+<?php
+session_start();
+
+// Vérifier que l'utilisateur est connecté
+if(!isset($_SESSION['user_id'])) {
+    header("Location: ../users/login.php");
+    exit();
+}
+
+include_once '../../config/database.php';
+
+$database = new Database();
+$db = $database->getConnection();
+
+// Récupérer les commandes de l'utilisateur
+$query = "SELECT * FROM commandes WHERE user_id = :user_id ORDER BY date_commande DESC";
+$stmt = $db->prepare($query);
+$stmt->bindParam(':user_id', $_SESSION['user_id']);
+$stmt->execute();
+$commandes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+include '../templates/header.php';
+?>
 
 <div class="container">
-    <div class="page-header">
-        <h1><i class="fas fa-box"></i> Mes Commandes</h1>
-    </div>
+    <h2 class="mb-4">
+        <i class="fas fa-box"></i> Mes Commandes
+    </h2>
     
-    <?php if (empty($commandes)): ?>
-        <div class="empty-state">
-            <i class="fas fa-box-open"></i>
-            <h2>Aucune commande</h2>
-            <p>Vous n'avez pas encore passé de commande</p>
-            <a href="index.php?controller=produit&action=index" class="btn btn-primary">
-                Découvrir nos produits
+    <?php if(empty($commandes)): ?>
+        <div class="text-center py-5">
+            <i class="fas fa-inbox fa-5x text-muted mb-4"></i>
+            <h3>Aucune commande</h3>
+            <p class="text-muted">Vous n'avez pas encore passé de commande</p>
+            <a href="../produits/index.php" class="btn btn-success mt-3">
+                <i class="fas fa-store"></i> Découvrir nos produits
             </a>
         </div>
     <?php else: ?>
-        <div class="commandes-list">
-            <?php foreach ($commandes as $commande): ?>
-                <div class="commande-card">
-                    <div class="commande-header">
-                        <div>
-                            <h3>Commande #<?php echo $commande['id']; ?></h3>
-                            <p class="commande-date">
-                                <i class="fas fa-calendar"></i>
-                                <?php echo date('d/m/Y à H:i', strtotime($commande['date_commande'])); ?>
+        <div class="row">
+            <?php foreach($commandes as $commande): ?>
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-success text-white d-flex justify-content-between">
+                            <span><strong>Commande #<?= $commande['id'] ?></strong></span>
+                            <span><?= date('d/m/Y', strtotime($commande['date_commande'])) ?></span>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Montant total :</span>
+                                <strong class="text-success"><?= number_format($commande['total'], 2) ?> €</strong>
+                            </div>
+                            <div class="mb-3">
+                                <span class="badge bg-<?= $commande['statut'] == 'confirmee' ? 'success' : 'warning' ?>">
+                                    <?= ucfirst($commande['statut']) ?>
+                                </span>
+                            </div>
+                            <p class="small text-muted mb-0">
+                                <strong>Livraison :</strong><br>
+                                <?= nl2br(htmlspecialchars($commande['adresse_livraison'])) ?>
                             </p>
-                        </div>
-                        <div>
-                            <?php
-                            $statutClass = '';
-                            $statutText = '';
-                            switch($commande['statut']) {
-                                case 'en_attente':
-                                    $statutClass = 'statut-warning';
-                                    $statutText = 'En attente';
-                                    break;
-                                case 'confirmee':
-                                    $statutClass = 'statut-info';
-                                    $statutText = 'Confirmée';
-                                    break;
-                                case 'expediee':
-                                    $statutClass = 'statut-primary';
-                                    $statutText = 'Expédiée';
-                                    break;
-                                case 'livree':
-                                    $statutClass = 'statut-success';
-                                    $statutText = 'Livrée';
-                                    break;
-                                case 'annulee':
-                                    $statutClass = 'statut-danger';
-                                    $statutText = 'Annulée';
-                                    break;
-                            }
-                            ?>
-                            <span class="statut-badge <?php echo $statutClass; ?>">
-                                <?php echo $statutText; ?>
-                            </span>
-                        </div>
-                    </div>
-                    
-                    <div class="commande-body">
-                        <div class="commande-info">
-                            <p><strong>Total :</strong> <?php echo number_format($commande['total'], 2, ',', ' '); ?> €</p>
-                            <p><strong>Adresse de livraison :</strong><br>
-                               <?php echo nl2br(htmlspecialchars($commande['adresse_livraison'])); ?>
-                            </p>
-                        </div>
-                        
-                        <div class="commande-actions">
-                            <a href="index.php?controller=user&action=commandeDetails&id=<?php echo $commande['id']; ?>" 
-                               class="btn btn-primary">
-                                <i class="fas fa-eye"></i> Voir les détails
-                            </a>
                         </div>
                     </div>
                 </div>
@@ -80,95 +67,4 @@
     <?php endif; ?>
 </div>
 
-<style>
-.empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    background: white;
-    border-radius: 15px;
-}
-
-.empty-state i {
-    font-size: 80px;
-    color: var(--border-color);
-    margin-bottom: 20px;
-}
-
-.commandes-list {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.commande-card {
-    background: white;
-    border-radius: 15px;
-    padding: 25px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-}
-
-.commande-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 2px solid var(--light-color);
-}
-
-.commande-header h3 {
-    color: var(--dark-color);
-    margin-bottom: 5px;
-}
-
-.commande-date {
-    color: #666;
-    font-size: 14px;
-}
-
-.statut-badge {
-    display: inline-block;
-    padding: 8px 20px;
-    border-radius: 20px;
-    font-weight: 600;
-    font-size: 14px;
-}
-
-.statut-warning {
-    background: #fff3cd;
-    color: #856404;
-}
-
-.statut-info {
-    background: #d1ecf1;
-    color: #0c5460;
-}
-
-.statut-primary {
-    background: #cfe2ff;
-    color: #084298;
-}
-
-.statut-success {
-    background: #d4edda;
-    color: #155724;
-}
-
-.statut-danger {
-    background: #f8d7da;
-    color: #721c24;
-}
-
-.commande-body {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
-}
-
-.commande-info p {
-    margin-bottom: 10px;
-}
-</style>
-
-<?php require_once __DIR__ . '/../templates/footer.php'; ?>
+<?php include '../templates/footer.php'; ?>

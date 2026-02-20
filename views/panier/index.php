@@ -144,12 +144,9 @@ include '../templates/header.php';
                     </div>
                     
                     <?php if(isset($_SESSION['user_id'])): ?>
-                        <button class="btn btn-success w-100 btn-lg" disabled>
-                            <i class="fas fa-check"></i> Valider la commande
-                        </button>
-                        <small class="text-muted d-block mt-2 text-center">
-                            (Fonctionnalité à venir)
-                        </small>
+                        <a href="checkout.php" class="btn btn-success w-100 btn-lg">
+                            <i class="fas fa-lock"></i> Valider la commande
+                        </a>
                     <?php else: ?>
                         <a href="../users/login.php" class="btn btn-success w-100 btn-lg">
                             <i class="fas fa-sign-in-alt"></i> Se connecter pour commander
