@@ -125,16 +125,47 @@
                     </a>
                 </li>
             <?php endif; ?>
-            <li class="nav-item">
-                <span class="nav-link text-light">
-                    Bonjour <strong><?= htmlspecialchars($_SESSION['user_prenom']) ?></strong>
-                </span>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link btn btn-outline-light btn-sm ms-2" 
-                   href="/cours/e-commerce/controllers/UserController.php?action=logout">
-                    <i class="fas fa-sign-out-alt"></i> Déconnexion
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle text-light" href="#" data-bs-toggle="dropdown">
+                    <i class="fas fa-user-circle"></i> Bonjour <strong><?= htmlspecialchars($_SESSION['user_prenom']) ?></strong>
                 </a>
+                <ul class="dropdown-menu dropdown-menu-end shadow">
+                    <li>
+                        <div class="px-3 py-2 border-bottom">
+                            <p class="mb-0 fw-bold"><?= htmlspecialchars($_SESSION['user_prenom']) ?></p>
+                            <small class="text-muted">Mon compte</small>
+                        </div>
+                    </li>
+                    <li>
+                        <a class="dropdown-item py-2" href="/cours/e-commerce/views/users/profile.php">
+                            <i class="fas fa-user me-2 text-success"></i> Mon profil
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item py-2" href="/cours/e-commerce/views/users/profile.php?tab=email">
+                            <i class="fas fa-envelope me-2 text-success"></i> Changer l'email
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item py-2" href="/cours/e-commerce/views/users/profile.php?tab=password">
+                            <i class="fas fa-lock me-2 text-success"></i> Changer mot de passe
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item py-2" href="/cours/e-commerce/views/users/commandes.php">
+                            <i class="fas fa-box me-2 text-success"></i> Mes commandes
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item py-2 text-danger fw-bold" 
+                           href="/cours/e-commerce/controllers/UserController.php?action=logout"
+                           onclick="return confirm('Voulez-vous vraiment vous déconnecter ?')">
+                            <i class="fas fa-sign-out-alt me-2"></i> Se déconnecter
+                        </a>
+
+                    </li>
+                </ul>
             </li>
         <?php else: ?>
             <li class="nav-item">
