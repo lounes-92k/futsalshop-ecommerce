@@ -59,42 +59,13 @@
                         <span style="font-size:20px; line-height:1;">🔴</span>
                         <span style="font-size:20px; line-height:1; margin-left:-8px; opacity:0.7;">🔴</span>
                     </div>
-                    <!-- Maestro -->
-                    <div style="background:white; border:1px solid #ddd; border-radius:6px; padding:6px 8px; display:flex; align-items:center;">
-                        <span style="font-size:13px; font-weight:700; color:#eb001b;">M</span>
-                        <span style="font-size:13px; font-weight:700; color:#0099df;">aestro</span>
-                    </div>
-                    <!-- Amex -->
-                    <div style="background:#016fd0; border-radius:6px; padding:6px 10px; display:flex; align-items:center;">
-                        <span style="color:white; font-size:11px; font-weight:800;">AMEX</span>
-                    </div>
                     <!-- PayPal -->
                     <div style="background:white; border:1px solid #ddd; border-radius:6px; padding:6px 10px; display:flex; align-items:center; gap:1px;">
                         <span style="color:#003087; font-size:12px; font-weight:800;">Pay</span>
                         <span style="color:#009cde; font-size:12px; font-weight:800;">Pal</span>
                     </div>
-                    <!-- CB -->
-                    <div style="background:#00529b; border-radius:6px; padding:6px 12px; display:flex; align-items:center;">
-                        <span style="color:white; font-size:12px; font-weight:800;">CB</span>
-                    </div>
                 </div>
 
-                <!-- Réseaux sociaux -->
-                <h6 class="fw-bold mt-4 mb-3" style="color:#1a1a1a;">Suivez-nous</h6>
-                <div class="d-flex gap-2">
-                    <a href="#" style="width:36px;height:36px;background:#1877f2;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;text-decoration:none;font-size:16px;">
-                        <i class="fab fa-facebook-f"></i>
-                    </a>
-                    <a href="#" style="width:36px;height:36px;background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;text-decoration:none;font-size:16px;">
-                        <i class="fab fa-instagram"></i>
-                    </a>
-                    <a href="#" style="width:36px;height:36px;background:#000;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;text-decoration:none;font-size:16px;">
-                        <i class="fab fa-tiktok"></i>
-                    </a>
-                    <a href="#" style="width:36px;height:36px;background:#1da1f2;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;text-decoration:none;font-size:16px;">
-                        <i class="fab fa-twitter"></i>
-                    </a>
-                </div>
             </div>
         </div>
     </div>
